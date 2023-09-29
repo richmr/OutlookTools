@@ -87,4 +87,10 @@ def export_attachments(email_folder_path:str, save_location:Path):
 
 
 def outlooktools():
-    app()
+    try:
+        app()
+    except Exception as badnews:
+        if -2147352567 in badnews.args:
+            print("The supplied mailbox or folder does not exist.  Please use list-mailboxes and list-folders to see valid entries.")
+        else:
+            raise badnews
