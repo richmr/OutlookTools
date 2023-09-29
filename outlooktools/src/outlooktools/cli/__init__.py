@@ -92,5 +92,6 @@ def outlooktools():
     except Exception as badnews:
         if -2147352567 in badnews.args:
             print("The supplied mailbox or folder does not exist.  Please use list-mailboxes and list-folders to see valid entries.")
+            raise typer.Exit(code=3)
         else:
             raise badnews
