@@ -1,12 +1,25 @@
 # SPDX-FileCopyrightText: 2023-present richmr <richmr@users.noreply.github.com>
 #
 # SPDX-License-Identifier: MIT
+from pathlib import Path
+
 import typer
 
 from outlooktools.__about__ import __version__
 from outlooktools.outlook_connection import OutlookConnection
 
 app = typer.Typer(name="OutlookTools")
+
+def printSubfolders(folder_com_obj):
+    """
+    Prints all the folders inside the supplied folder path
+    """
+    # make a list of them
+    folder_list = [f.name for f in folder_com_obj.Folders]
+    # sort it for ease of reading
+    folder_list.sort(key=str.lower)
+    for folder_name in folder_list:
+        print(f"\t{folder_name}")
 
 @app.command()
 def count_items(folder_path:str):
@@ -18,8 +31,7 @@ def count_items(folder_path:str):
     folder = oc.traverseFolders(folder_path)
     messages = list(folder.Items)
     print(f"There are {len(messages)} messages in {folder_path}")
-    print(f"First subject: {messages[0].Subject}")
-
+    
 @app.command()
 def list_mailboxes():
     """
@@ -27,10 +39,51 @@ def list_mailboxes():
     """
     oc = OutlookConnection()
     print("Available mailboxes:")
-    for folder in oc.outlook.Folders:
-        print(f"\t{folder.name}")
+    printSubfolders(oc.outlook)
     print("")
     print("Prepend this to your folder path to delve into correct mailbox")
+
+@app.command()
+def list_folders(folder_path:str):
+    """
+    Lists all folders for a given folder path
+    """
+    oc = OutlookConnection()
+    folder = oc.traverseFolders(folder_path)
+    print(f"Subfolders in this {folder_path}")
+    printSubfolders(folder)
+
+@app.command()
+def export_attachments(email_folder_path:str, save_location:Path):
+    """
+    Saves all attachments found in the designated email folder.
+    """
+    if not save_location.is_dir():
+        print(f"The provided path {save_location} is not a valid folder.  Please check and create it if necessary.")
+        raise typer.Exit(code=3)
+    
+    oc = OutlookConnection()
+    folder = oc.traverseFolders(email_folder_path)
+    # Store filenames to deal with duplicates
+    filenames = []
+    # Adapted from: https://hridai.medium.com/automate-your-outlook-e-mail-with-python-f4eddce975
+    for msg in folder.Items:
+        for atmt in msg.Attachments:
+            filename = atmt.FileName
+            count_of_file = filenames.count(filename)
+            if count_of_file > 0:
+                # split from suffixes
+                parts = filename.split(".")
+                filename = f"{parts[0]}_{count_of_file}"
+                # watch out for filenames with no suffixes
+                if len(parts) > 0:
+                    filename = filename + "." + ".".join(parts[1:])
+            filename = f"{save_location}\\{filename}"
+            atmt.SaveAsFile(filename)
+            filenames.append(atmt.Filename)
+
+    print(f"Exported {len(filenames)} files to {save_location}")
+    print("Please note there may be a lot of 'filler' images labeled like image001.jpg or image002.png.  These are generally from signatures and other design elements in the email.\nHowever, screenshots are labeled the same way, so these are exported as well.")
 
 
 def outlooktools():
