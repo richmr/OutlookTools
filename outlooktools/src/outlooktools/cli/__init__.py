@@ -85,6 +85,25 @@ def export_attachments(email_folder_path:str, save_location:Path):
     print(f"Exported {len(filenames)} files to {save_location}")
     print("Please note there may be a lot of 'filler' images labeled like image001.jpg or image002.png.  These are generally from signatures and other design elements in the email.\nHowever, screenshots are labeled the same way, so these are exported as well.")
 
+@app.command()
+def send_plain_email():
+    """
+    Allows sending a plain text email with a single attachment
+    """
+    oc = OutlookConnection()
+    to = typer.prompt("To")
+    subj = typer.prompt("Subject")
+    body = typer.prompt("Message")
+    attachment_path = typer.prompt("Path to attachment [Enter for None]")
+    if len(attachment_path) > 0:
+        attachment_path = Path(attachment_path)
+    else:
+        attachment_path = None
+    send_it = typer.confirm("Send this email?")
+    if send_it:
+        oc.sendPlainEmail(to, subj, body, attachment_path)
+    else:
+        print("Email was not sent")
 
 def outlooktools():
     try:

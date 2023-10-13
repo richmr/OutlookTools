@@ -1,6 +1,7 @@
 
 import win32com.client
 import re
+from pathlib import Path
 
 class OutlookConnection:
 
@@ -33,3 +34,17 @@ class OutlookConnection:
         for next_folder in path_list[1:]:
             folder = self.getFolder(folder_name=next_folder, parent_folder=folder)
         return folder
+    
+    def sendPlainEmail(self, to:str, subj:str, body:str, attachment:Path = None):
+        # Cannot use the self.outlook because that is on the MAPI namespace
+        oc = win32com.client.Dispatch("Outlook.Application")
+        mail = oc.CreateItem(0)
+        mail.To = to
+        mail.Subject = subj
+        mail.Body = body
+        if attachment is not None:
+            mail.Attachments.add(f"{attachment}")
+        mail.Send()
+        
+        
+        
