@@ -94,8 +94,8 @@ def send_plain_email():
     to = typer.prompt("To")
     subj = typer.prompt("Subject")
     body = typer.prompt("Message")
-    attachment_path = typer.prompt("Path to attachment [Enter for None]")
-    if len(attachment_path) > 0:
+    attachment_path = typer.prompt("Path to attachment", default="None", show_default=True)
+    if attachment_path != "None":
         attachment_path = Path(attachment_path)
     else:
         attachment_path = None
