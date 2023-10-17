@@ -30,9 +30,9 @@ dependencies = [
 ]
 
 [project.urls]
-Documentation = "https://github.com/unknown/outlooktools#readme"
-Issues = "https://github.com/unknown/outlooktools/issues"
-Source = "https://github.com/unknown/outlooktools"
+Documentation = "https://github.com/richmr/outlooktools#readme"
+Issues = "https://github.com/richmr/outlooktools/issues"
+Source = "https://github.com/richmr/outlooktools"
 
 [project.scripts]
 outlooktools = "outlooktools.cli:outlooktools"
