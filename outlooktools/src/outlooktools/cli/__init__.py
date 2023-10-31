@@ -62,6 +62,9 @@ def export_attachments(email_folder_path:str, save_location:Path):
         print(f"The provided path {save_location} is not a valid folder.  Please check and create it if necessary.")
         raise typer.Exit(code=3)
     
+    # If you use a relative path, it will save the attachments relative to the file location of the exchange mailbox!
+    save_location = save_location.absolute()
+    
     oc = OutlookConnection()
     folder = oc.traverseFolders(email_folder_path)
     # Store filenames to deal with duplicates
@@ -79,8 +82,13 @@ def export_attachments(email_folder_path:str, save_location:Path):
                 if len(parts) > 0:
                     filename = filename + "." + ".".join(parts[1:])
             filename = f"{save_location}\\{filename}"
-            atmt.SaveAsFile(filename)
-            filenames.append(atmt.Filename)
+            try:
+                atmt.SaveAsFile(filename)
+                filenames.append(atmt.Filename)
+            except Exception as badnews:
+                print(f"Unable to save {filename} because {badnews}")
+
+            
 
     print(f"Exported {len(filenames)} files to {save_location}")
     print("Please note there may be a lot of 'filler' images labeled like image001.jpg or image002.png.  These are generally from signatures and other design elements in the email.\nHowever, screenshots are labeled the same way, so these are exported as well.")
